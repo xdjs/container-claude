@@ -7,31 +7,25 @@ Docker-based isolated environment for running Claude Code with gh CLI and Playwr
 When a user asks to set up this container (or you detect .env doesn't exist):
 
 1. Copy .env.example to .env
-2. Use the AskUserQuestion tool to gather all setup info in a wizard-like flow. Ask these questions across two AskUserQuestion calls (max 4 questions per call):
+2. Read the Configuration table in README.md to get variable names, defaults, and descriptions. Use these as the source of truth for option labels and default values in the questions below.
+3. Use the AskUserQuestion tool to gather all setup info in a wizard-like flow. Ask these questions across two AskUserQuestion calls (max 4 questions per call):
 
    **Call 1 — Identity and config mode:**
-   - Question 1 (header: "Git name"): "What name should be used for git commits?" — open-ended, no options (user types their name via "Other")
-   - Question 2 (header: "Git email"): "What email should be used for git commits?" — open-ended, no options (user types their email via "Other")
-   - Question 3 (header: "Config mode"): "How should the container get your Claude settings?"
-     - Option 1: "seed (Recommended)" — "Copy your host ~/.claude config into the container on first run. You get your auth and settings without re-logging in."
-     - Option 2: "mount" — "Bind mount host config directly. Host and container share state — changes in one affect the other."
-     - Option 3: "fresh" — "Start clean. You'll log in to Claude interactively inside the container."
+   - Question 1 (header: "Git name"): Ask for the user's git commit name — open-ended, no options (user types their name via "Other")
+   - Question 2 (header: "Git email"): Ask for the user's git commit email — open-ended, no options (user types their email via "Other")
+   - Question 3 (header: "Config mode"): Ask how the container should get Claude settings. Read the "Claude config modes" section in README.md for the available modes and their descriptions. Mark the recommended option.
 
    **Call 2 — Optional settings:**
-   - Question 1 (header: "Container"): "What should the Docker container be named?"
-     - Option 1: "claude-dev (Recommended)" — "Default container name"
-     - (user can pick default or type a custom name via "Other")
-   - Question 2 (header: "Port"): "Which host port should map to the container's port 3000?"
-     - Option 1: "3000 (Recommended)" — "Default port"
-     - (user can pick default or type a custom port via "Other")
-   - Question 3 (header: "GH_TOKEN"): "Do you have a GitHub personal access token ready?"
-     - Option 1: "Yes, let me paste it" — "You'll paste your ghp_... token and it will be exported for this session"
-     - Option 2: "Skip for now" — "You can set it later with: export GH_TOKEN=ghp_... before running ./run.sh"
+   - Question 1 (header: "Container"): Ask for the Docker container name. Use the default from README.md as the recommended option; let the user type a custom name via "Other".
+   - Question 2 (header: "Port"): Ask which host port to map. Use the default from README.md as the recommended option; let the user type a custom port via "Other".
+   - Question 3 (header: "GH_TOKEN"): Ask if the user has a GitHub personal access token ready.
+     - Option 1: "Yes, let me paste it" — the token will be exported for this session
+     - Option 2: "Skip for now" — they can set it later before running ./run.sh
 
-3. Write all answers into .env (use defaults for anything the user didn't customize)
-4. If the user provided a GH_TOKEN, export it in the current shell session
-5. Run ./build_image.sh to build the Docker image
-6. Run ./run.sh to start the container (if GH_TOKEN was skipped, remind the user to export it first)
+4. Write all answers into .env (use defaults from README.md for anything the user didn't customize)
+5. If the user provided a GH_TOKEN, export it in the current shell session
+6. Run ./build_image.sh to build the Docker image
+7. Run ./run.sh to start the container (if GH_TOKEN was skipped, remind the user to export it first)
 
 ## Inside the container
 
