@@ -8,14 +8,14 @@ When a user asks to set up this container (or you detect .env doesn't exist):
 
 1. Copy .env.example to .env
 2. Read the Configuration table in README.md to get variable names, defaults, and descriptions. Use these as the source of truth for option labels and default values in the questions below.
-3. Use the AskUserQuestion tool to gather all setup info in a wizard-like flow. Ask these questions across two AskUserQuestion calls (max 4 questions per call):
+3. Use the AskUserQuestion tool to gather all setup info in a wizard-like flow. You MUST make exactly two AskUserQuestion calls — do not skip the second call.
 
-   **Call 1 — Identity and config mode:**
+   **Call 1 — Identity and config mode (3 questions):**
    - Question 1 (header: "Git name"): Ask for the user's git commit name — open-ended, no options (user types their name via "Other")
    - Question 2 (header: "Git email"): Ask for the user's git commit email — open-ended, no options (user types their email via "Other")
    - Question 3 (header: "Config mode"): Ask how the container should get Claude settings. Read the "Claude config modes" section in README.md for the available modes and their descriptions. Mark the recommended option.
 
-   **Call 2 — Optional settings:**
+   **Call 2 — Container, port, and GitHub token (3 questions). DO NOT SKIP THIS CALL:**
    - Question 1 (header: "Container"): Ask for the Docker container name. Use the default from README.md as the recommended option; let the user type a custom name via "Other".
    - Question 2 (header: "Port"): Ask which host port to map. Use the default from README.md as the recommended option; let the user type a custom port via "Other".
    - Question 3 (header: "GH_TOKEN"): Ask if the user has a GitHub personal access token ready.
