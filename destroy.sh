@@ -9,11 +9,13 @@ fi
 source .env
 
 CONTAINER="${CONTAINER_NAME:-claude-dev}"
+IMAGE="${IMAGE_NAME:-claude-code}"
 
 echo "This will permanently delete:"
 echo "  - Container: ${CONTAINER}"
 echo "  - Volume:    ${CONTAINER}-config"
 echo "  - Volume:    ${CONTAINER}-workspace"
+echo "  - Image:     ${IMAGE}"
 echo ""
 read -r -p "Are you sure? [y/N] " response
 if [[ ! "$response" =~ ^[Yy]$ ]]; then
@@ -24,4 +26,5 @@ fi
 docker rm -f "${CONTAINER}" 2>/dev/null || true
 docker volume rm "${CONTAINER}-config" 2>/dev/null || true
 docker volume rm "${CONTAINER}-workspace" 2>/dev/null || true
-echo "Done. Container and volumes removed."
+docker rmi "${IMAGE}" 2>/dev/null || true
+echo "Done. Container, volumes, and image removed."
