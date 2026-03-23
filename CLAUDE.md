@@ -17,7 +17,7 @@ When a user asks to set up this container (or you detect .env doesn't exist):
      - Option 1: "Yes, let me paste it" — the token will be exported for this session
      - Option 2: "Skip for now" — they can set it later before running ./run.sh
 
-4. After the user answers, ask (in plain text) if they want to customize the container name or host port, or use the defaults from README.md. Most users should just use defaults.
+4. After the user answers, ask (in plain text) if they want to customize the image name, container name or host port, or use the defaults from README.md. Most users should just use defaults.
 5. Write all answers into .env (use defaults from README.md for anything the user didn't customize)
 6. If the user provided a GH_TOKEN, export it in the current shell session
 7. Run ./build_image.sh to build the Docker image
