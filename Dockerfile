@@ -72,7 +72,7 @@ RUN { \
 # Git config
 RUN git config --global user.name "${GIT_USER_NAME}" && \
     git config --global user.email "${GIT_USER_EMAIL}" && \
-    git config --global credential.helper "gh auth git-credential"
+    git config --global credential.helper "!/usr/bin/gh auth git-credential"
 
 WORKDIR /${WORKSPACE_DIR}
 
