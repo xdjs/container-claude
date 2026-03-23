@@ -106,6 +106,12 @@ if [ "${CLAUDE_CONFIG}" = "seed" ]; then
     echo "Warning: ~/.claude.json not found on host, skipping seed."
   fi
 
+  # Fix ownership — docker cp copies files as root
+  docker start "${CONTAINER}"
+  docker exec -u root "${CONTAINER}" chown -R "${DOCKER_USER}:${DOCKER_USER}" \
+    "/home/${DOCKER_USER}/.claude" "/home/${DOCKER_USER}/.claude.json" 2>/dev/null || true
+  docker stop "${CONTAINER}" > /dev/null
+
   docker start -ai "${CONTAINER}"
 else
   docker run -it "${RUN_ARGS[@]}" "${IMAGE}" bash --login
