@@ -1,7 +1,10 @@
 FROM node:22-slim
 
+LABEL maintainer="musicnerd"
+LABEL description="Claude Code development environment with gh CLI and Playwright support"
+
 # System deps: git, curl, bash, vim, psql, python, Playwright/Chromium requirements
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     bash \
@@ -31,7 +34,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
       | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
       | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
-    apt-get update && apt-get install -y gh && \
+    apt-get update && apt-get install -y --no-install-recommends gh && \
     rm -rf /var/lib/apt/lists/*
 
 # Build args
@@ -56,19 +59,24 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Add Claude Code to PATH
 ENV PATH="/home/${DOCKER_USER}/.local/bin:${PATH}"
-RUN echo 'export PATH="/home/'"${DOCKER_USER}"'/.local/bin:$PATH"' >> /home/${DOCKER_USER}/.bashrc
 
-# Aliases
-RUN echo 'alias ll="ls -la"' >> /home/${DOCKER_USER}/.bashrc && \
-    echo 'alias h="history"' >> /home/${DOCKER_USER}/.bashrc && \
-    echo 'alias clauded="claude --dangerously-skip-permissions"' >> /home/${DOCKER_USER}/.bashrc
-RUN echo 'source ~/.bashrc' >> /home/${DOCKER_USER}/.bash_profile
+# Shell customization (PATH for interactive shells, aliases, profile)
+RUN { \
+      echo "export PATH=\"/home/${DOCKER_USER}/.local/bin:\$PATH\""; \
+      echo 'alias ll="ls -la"'; \
+      echo 'alias h="history"'; \
+      echo 'alias clauded="claude --dangerously-skip-permissions"'; \
+    } >> /home/${DOCKER_USER}/.bashrc && \
+    echo 'source ~/.bashrc' >> /home/${DOCKER_USER}/.bash_profile
 
 # Git config
 RUN git config --global user.name "${GIT_USER_NAME}" && \
     git config --global user.email "${GIT_USER_EMAIL}" && \
-    git config --global credential.helper "gh auth git-credential"
+    git config --global credential.helper "!/usr/bin/gh auth git-credential"
 
 WORKDIR /${WORKSPACE_DIR}
+
+HEALTHCHECK --interval=60s --timeout=5s --retries=3 \
+  CMD claude --version || exit 1
 
 CMD ["bash"]
