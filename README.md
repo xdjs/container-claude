@@ -26,6 +26,19 @@ Edit `.env` to customize your setup. Key variables:
 | `IMAGE_NAME` | `claude-code` | Docker image name |
 | `HOST_PORT` | `3000` | Host port mapped to container port 3000 |
 | `CLAUDE_CONFIG` | `fresh` | How to handle Claude settings (see below) |
+| `GH_TOKEN` | (none) | GitHub personal access token for gh CLI auth (see below) |
+
+### GitHub token
+
+`GH_TOKEN` is passed into the container as an environment variable. The gh CLI picks it up automatically — no `gh auth login` needed. It also powers `git push`/`pull` via the credential helper.
+
+Export it in your shell before running `./run.sh`:
+
+```bash
+export GH_TOKEN=ghp_...
+```
+
+If not set, `run.sh` will warn you and ask whether to continue without GitHub authentication.
 
 ### Claude config modes
 
