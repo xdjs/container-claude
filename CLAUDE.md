@@ -17,11 +17,14 @@ When a user asks to set up this container (or you detect .env doesn't exist):
      - Option 1: "Yes, let me paste it" — the token will be exported for this session
      - Option 2: "Skip for now" — they can set it later before running ./run.sh
 
-4. After the user answers, ask (in plain text) if they want to customize the image name, container name or host port, or use the defaults from README.md. Most users should just use defaults.
-5. Write all answers into .env (use defaults from README.md for anything the user didn't customize)
-6. If the user provided a GH_TOKEN, export it in the current shell session
+4. After the user answers, ask (in plain text) if they want to customize the image name, container name or host port, or use the defaults from README.md. Most users should just use defaults. Also ask how they want to authenticate Claude Code inside the container:
+   - `ANTHROPIC_AUTH_TOKEN` (preferred) — from `claude setup-token`, let them paste it
+   - `ANTHROPIC_API_KEY` — direct API key from console.anthropic.com, let them paste it
+   - Skip — they'll log in interactively inside the container
+5. Write all answers into .env (use defaults from README.md for anything the user didn't customize). Auth tokens (ANTHROPIC_AUTH_TOKEN, ANTHROPIC_API_KEY) are NOT written to .env — they are exported in the shell only.
+6. If the user provided a GH_TOKEN, export it in the current shell session. If the user provided an ANTHROPIC_AUTH_TOKEN or ANTHROPIC_API_KEY, export that as well.
 7. Run ./build_image.sh to build the Docker image
-8. Run ./run.sh to start the container (if GH_TOKEN was skipped, remind the user to export it first)
+8. Run ./run.sh to start the container (if GH_TOKEN was skipped, remind the user to export it first; if Claude auth was skipped, mention they can log in interactively with `/login` or export a token later)
 
 ## Inside the container
 

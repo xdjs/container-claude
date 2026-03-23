@@ -27,6 +27,8 @@ Edit `.env` to customize your setup. Key variables:
 | `HOST_PORT` | `3000` | Host port mapped to container port 3000 |
 | `CLAUDE_CONFIG` | `fresh` | How to handle Claude settings (see below) |
 | `GH_TOKEN` | (none) | GitHub personal access token for gh CLI auth (see below) |
+| `ANTHROPIC_AUTH_TOKEN` | (none) | Claude auth token from `claude setup-token` (see below) |
+| `ANTHROPIC_API_KEY` | (none) | Anthropic API key for direct API auth (see below) |
 
 ### GitHub token
 
@@ -40,13 +42,30 @@ export GH_TOKEN=ghp_...
 
 If not set, `run.sh` will warn you and ask whether to continue without GitHub authentication.
 
+### Claude authentication
+
+By default, Claude Code prompts for interactive login (`/login`) inside the container. To skip that, export one of these tokens in your host shell before running `./run.sh`:
+
+- **`ANTHROPIC_AUTH_TOKEN`** (preferred) — An OAuth-derived token. Generate it on the host with `claude setup-token`, then export the value:
+  ```bash
+  export ANTHROPIC_AUTH_TOKEN=<token-from-setup-token>
+  ```
+- **`ANTHROPIC_API_KEY`** (alternative) — A direct Anthropic API key from console.anthropic.com:
+  ```bash
+  export ANTHROPIC_API_KEY=sk-ant-...
+  ```
+
+**Precedence**: `ANTHROPIC_AUTH_TOKEN` > `ANTHROPIC_API_KEY` > interactive OAuth via `/login`.
+
+If neither is set, Claude works normally and prompts for login inside the container. Both variables are passed as environment variables (never written to disk), following the same pattern as `GH_TOKEN`.
+
 ### Claude config modes
 
 Control how the container gets your Claude Code settings via `CLAUDE_CONFIG`:
 
-- **`fresh`** (default) — Empty start. Claude will prompt you to log in interactively inside the container. Credentials persist in a named volume across sessions.
-- **`seed`** — On first container creation, copies your host `~/.claude/` and `~/.claude.json` into the container volume. You get your auth, settings, and preferences without re-logging in. After that, host and container are independent.
-- **`mount`** — Bind mounts your host `~/.claude/` and `~/.claude.json` directly into the container. Changes inside the container affect your host and vice versa.
+- **`fresh`** (default) — Empty start. No host settings are carried over. Auth is handled separately (see Claude authentication above).
+- **`seed`** — On first container creation, copies your host `~/.claude/` and `~/.claude.json` into the container volume. This carries over **settings and preferences only** — OAuth tokens are machine-bound and won't work in the container. Auth is handled separately via environment variables or interactive login. After seeding, host and container are independent.
+- **`mount`** — Bind mounts your host `~/.claude/` and `~/.claude.json` directly into the container. Carries over settings and preferences. Auth is still handled separately — mounted OAuth tokens are machine-bound and may not work inside the container. Changes inside the container affect your host and vice versa.
 
 ## Build
 
@@ -56,12 +75,13 @@ Control how the container gets your Claude Code settings via `CLAUDE_CONFIG`:
 
 Rebuild when you change build-time variables in `.env` (`GIT_USER_NAME`, `GIT_USER_EMAIL`, `DOCKER_USER`, `WORKSPACE_DIR`).
 
-No rebuild needed for runtime variables (`HOST_PORT`, `CLAUDE_CONFIG`, `GH_TOKEN`).
+No rebuild needed for runtime variables (`HOST_PORT`, `CLAUDE_CONFIG`, `GH_TOKEN`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_API_KEY`).
 
 ## Run
 
 ```bash
 export GH_TOKEN=ghp_...
+export ANTHROPIC_AUTH_TOKEN=...   # optional, from claude setup-token
 ./run.sh
 ```
 
@@ -102,6 +122,7 @@ use: {
 ## Security
 
 - **GH_TOKEN**: Export in your shell rather than storing in `.env`. If you do store it in `.env`, the file is gitignored by default.
+- **ANTHROPIC_AUTH_TOKEN / ANTHROPIC_API_KEY**: Same approach as GH_TOKEN — export in your shell, never stored in the image or filesystem.
 - **Container hardening**: The container runs with all Linux capabilities dropped except the minimum needed (CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID, SYS_CHROOT, NET_BIND_SERVICE). Memory is capped at 8 GB with a 512 process limit.
 - **Non-root user**: The container runs as a non-root user (`dev` by default).
 
@@ -111,7 +132,7 @@ use: {
 
 **Container already exists**: `run.sh` will restart the existing container. To recreate it, run `./destroy.sh` first, then `./run.sh`.
 
-**Claude prompts for login despite using `seed` mode**: The seed only happens on first container creation. If the container already exists, destroy and recreate it.
+**Claude prompts for login despite using `seed` or `mount` mode**: Config modes carry over settings and preferences only — OAuth tokens are machine-bound and don't transfer into containers. Use `ANTHROPIC_AUTH_TOKEN` (from `claude setup-token`) or `ANTHROPIC_API_KEY` to authenticate without interactive login. See [Claude authentication](#claude-authentication) above.
 
 ## Notes
 

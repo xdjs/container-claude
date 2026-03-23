@@ -59,6 +59,14 @@ if [ -n "${GH_TOKEN:-}" ]; then
   RUN_ARGS+=(-e "GH_TOKEN")
 fi
 
+# Pass Claude auth tokens if set
+if [ -n "${ANTHROPIC_AUTH_TOKEN:-}" ]; then
+  RUN_ARGS+=(-e "ANTHROPIC_AUTH_TOKEN")
+fi
+if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+  RUN_ARGS+=(-e "ANTHROPIC_API_KEY")
+fi
+
 # Handle Claude config mode
 case "${CLAUDE_CONFIG}" in
   mount)
