@@ -59,6 +59,8 @@ By default, Claude Code prompts for interactive login (`/login`) inside the cont
 
 If neither is set, Claude works normally and prompts for login inside the container. Both variables are passed as environment variables (never written to disk), following the same pattern as `GH_TOKEN`.
 
+**Note**: If the container has existing OAuth credentials (from a previous `/login` or `seed` mode) alongside an env var token, Claude will warn about an auth conflict. To avoid this, use `CLAUDE_CONFIG=fresh` when authenticating via env var, or run `claude /logout` inside the container.
+
 ### Claude config modes
 
 Control how the container gets your Claude Code settings via `CLAUDE_CONFIG`:
